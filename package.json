@@ -1,0 +1,9 @@
+{
+  "name": "auhack-streamlit-ui",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": ".\\.venv\\Scripts\\python.exe -m streamlit run streamlit_app.py",
+    "start:headless": ".\\.venv\\Scripts\\python.exe -m streamlit run streamlit_app.py --server.headless true"
+  }
+}
