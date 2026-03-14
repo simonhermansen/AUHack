@@ -465,7 +465,7 @@ def _call_openai_briefing(stats: dict) -> str | None:
                 },
                 {"role": "user", "content": prompt},
             ],
-            max_tokens=120,
+            max_tokens=220,
             temperature=0.5,
         )
         return response.choices[0].message.content.strip()
