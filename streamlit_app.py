@@ -1,7 +1,13 @@
 from __future__ import annotations
 
+import atexit
+import functools
+import http.server
 import os
+import socket
 import sys
+import threading
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +19,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+import streamlit.components.v1 as components
 from catboost import CatBoostRegressor
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -60,6 +67,43 @@ SWEEPABLE_FEATURES: dict[str, str] = {
     "gen_total_mw": "Total generation (MW)",
     "flow_total_in_mw": "Net imports (MW)",
 }
+
+
+def _url_is_reachable(url: str, timeout_seconds: float = 1.0) -> bool:
+    try:
+        req = urllib.request.Request(url, method="HEAD")
+        with urllib.request.urlopen(req, timeout=timeout_seconds):
+            return True
+    except Exception:
+        return False
+
+
+def _find_free_port(start_port: int = 8600, end_port: int = 8700) -> int | None:
+    for port in range(start_port, end_port):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            if sock.connect_ex(("127.0.0.1", port)) != 0:
+                return port
+    return None
+
+
+@st.cache_resource
+def _start_local_static_server(directory: str) -> str | None:
+    try:
+        chosen_port = _find_free_port()
+        if chosen_port is None:
+            return None
+
+        handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=directory)
+        server = http.server.ThreadingHTTPServer(("127.0.0.1", chosen_port), handler)
+
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+
+        atexit.register(server.shutdown)
+        return f"http://127.0.0.1:{chosen_port}"
+    except Exception:
+        return None
 
 
 @st.cache_resource
@@ -527,6 +571,37 @@ def render_ai_briefing_video(summary_text: str) -> None:
     )
 
 
+def render_game_tab() -> None:
+    game_root = PROJECT_ROOT / "energy-gambling-markets"
+    game_dist = game_root / "dist"
+    configured_dev_url = os.environ.get("GAME_DEV_URL", "http://127.0.0.1:3000")
+
+    st.markdown("### Game")
+    st.caption("Interactive game experience embedded from your game app.")
+
+    if game_dist.exists() and (game_dist / "index.html").exists():
+        static_url = _start_local_static_server(str(game_dist))
+        if static_url:
+            game_url = f"{static_url}/index.html"
+            components.iframe(game_url, height=920, scrolling=True)
+            st.caption("Loaded from local production build.")
+            return
+
+    if _url_is_reachable(configured_dev_url):
+        components.iframe(configured_dev_url, height=920, scrolling=True)
+        st.caption("Loaded from running development server.")
+        return
+
+    st.warning("Game app not found as build or running dev server.")
+    st.code(
+        "cd energy-gambling-markets\n"
+        "npm install\n"
+        "npm run build",
+        language="bash",
+    )
+    st.caption("After building, rerun Streamlit and the game will load here automatically.")
+
+
 def main() -> None:
     st.set_page_config(page_title="AUHack What-If Analysis", layout="wide")
     st.title("AUHack What-If Analysis")
@@ -770,8 +845,7 @@ def main() -> None:
                 st.caption(f"Baseline MAE (model vs actual): {baseline_mae:,.2f} EUR/MWh")
 
     with top_tab_game:
-        st.markdown("### Game")
-        st.info("Placeholder tab ready. Share your game spec and I will wire it in here.")
+        render_game_tab()
 
 
 if __name__ == "__main__":
