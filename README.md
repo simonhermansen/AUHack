@@ -1,4 +1,4 @@
-# AUHack: Electricity Price Modeling + Interactive Game Demo
+# AUHack: Electricity Price Modeling + Interactive Game Platform
 
 Hackathon project for InCommodities combining:
 
@@ -26,7 +26,7 @@ Artifacts layout:
 3. `artifacts/reports/tables/`: Experiment/benchmark CSV outputs.
 4. `artifacts/reports/plots/`: Plot PNG outputs.
 
-## Quick Start (Judge-Friendly)
+## Quick Start
 
 ### 1) Python environment
 
@@ -50,6 +50,92 @@ npm start
 ```
 
 This starts Streamlit and embeds the game hub from local frontend builds.
+
+## Run Guide (Windows and macOS/Linux)
+
+### Windows (PowerShell)
+
+1. Create and activate Python environment:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+2. Install and build game frontends:
+
+```powershell
+npm --prefix energy-gambling-markets install --legacy-peer-deps
+npm --prefix grid-casino install --legacy-peer-deps
+npm --prefix energy-gambling-markets run build
+npm --prefix grid-casino run build
+```
+
+3. Run baseline ML pipeline:
+
+```powershell
+python src/combine_folder_csvs.py
+python src/build_panel_dataset.py
+python src/train_price_model.py
+```
+
+4. Optional reports:
+
+```powershell
+python src/feature_set_experiments.py --iterations 1200
+python src/benchmark_models.py
+python src/holiday_feature_impact.py
+python src/generate_plots.py
+```
+
+5. Launch website (Streamlit app):
+
+```powershell
+python -m streamlit run streamlit_app.py
+```
+
+### macOS / Linux (bash/zsh)
+
+1. Create and activate Python environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+2. Install and build game frontends:
+
+```bash
+npm --prefix energy-gambling-markets install --legacy-peer-deps
+npm --prefix grid-casino install --legacy-peer-deps
+npm --prefix energy-gambling-markets run build
+npm --prefix grid-casino run build
+```
+
+3. Run baseline ML pipeline:
+
+```bash
+python src/combine_folder_csvs.py
+python src/build_panel_dataset.py
+python src/train_price_model.py
+```
+
+4. Optional reports:
+
+```bash
+python src/feature_set_experiments.py --iterations 1200
+python src/benchmark_models.py
+python src/holiday_feature_impact.py
+python src/generate_plots.py
+```
+
+5. Launch website (Streamlit app):
+
+```bash
+python -m streamlit run streamlit_app.py
+```
 
 ## Main Workflows
 
@@ -142,7 +228,7 @@ Default dev URLs:
 1. Frontend game projects are separate Vite apps embedded in Streamlit (not a single monorepo package).
 2. Game data is fetched from GitHub raw CSVs at runtime; network quality affects initial load time.
 3. Grid Casino currently calculates monthly baseline from available historical rows in the selected market dataset (not external market fundamentals).
-4. Streamlit and game frontends are demo-optimized; there is no production auth, persistence, or multiplayer state.
+4. Streamlit and game frontends are prototype-focused; there is no production auth, persistence, or multiplayer state.
 
 ## Next Steps
 

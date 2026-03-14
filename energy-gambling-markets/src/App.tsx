@@ -307,11 +307,11 @@ export default function App() {
       {!country ? (
         <>
           {loading ? (
-            <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white text-2xl font-bold">
+            <div className="h-screen bg-slate-900 flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
               Loading Market Data...
             </div>
           ) : pendingCountry ? (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white font-sans flex flex-col items-center justify-center p-8">
+            <div className="h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white font-sans flex flex-col items-center justify-center p-8 overflow-hidden">
               <div className="w-full max-w-3xl bg-black/50 border border-white/10 rounded-3xl shadow-2xl p-8">
                 <div className="text-center mb-8">
                   <div className="text-4xl font-serif text-yellow-500 tracking-widest mb-2">TABLE {pendingCountry}</div>
@@ -348,8 +348,9 @@ export default function App() {
           )}
         </>
       ) : (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white font-sans flex flex-col items-center py-8 overflow-x-hidden">
-          <div className="flex items-center justify-between w-full max-w-7xl px-4 mb-8">
+        <div className="h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white font-sans flex flex-col items-center py-3 overflow-hidden">
+          <div className="w-full max-w-7xl origin-top scale-[0.88] lg:scale-[0.92] 2xl:scale-[0.96]">
+          <div className="flex items-center justify-between w-full px-4 mb-6">
             <button onClick={handleChangeTable} className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-bold border border-slate-600 transition-colors">
               &larr; CHANGE TABLE
             </button>
@@ -366,7 +367,7 @@ export default function App() {
           </div>
 
           {currentRound && (
-            <div className="flex flex-col items-center mb-8 gap-2">
+            <div className="flex flex-col items-center mb-6 gap-2">
               <div className="bg-black/40 px-6 py-3 rounded-xl border border-white/10 flex gap-8 text-sm tracking-wider shadow-lg">
                 <div><span className="text-gray-400">DATE:</span> <span className="font-mono text-yellow-400"><SlotText text={currentRound.time.split('T')[0]} isSpinning={isSlotSpinning} /></span></div>
                 <div><span className="text-gray-400">HOUR:</span> <span className="font-mono text-yellow-400"><SlotText text={currentRound.time.split('T')[1]} isSpinning={isSlotSpinning} /></span></div>
@@ -390,7 +391,7 @@ export default function App() {
             </div>
           )}
 
-          <div className="flex flex-col xl:flex-row gap-12 items-center justify-center w-full max-w-7xl px-4">
+          <div className="flex flex-col xl:flex-row gap-8 items-center justify-center w-full px-4">
             
             <div className="relative w-80 h-80 lg:w-[400px] lg:h-[400px] shrink-0">
               <RouletteWheel spinning={spinning} targetNumber={targetNumber} onStop={handleSpinComplete} roundPrices={currentRound?.roundPercentages || []} />
@@ -481,6 +482,7 @@ export default function App() {
               </div>
             </div>
 
+          </div>
           </div>
         </div>
       )}

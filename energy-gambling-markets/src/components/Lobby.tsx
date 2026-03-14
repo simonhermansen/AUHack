@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps';
-import { COUNTRIES } from '../services/dataService';
+import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 
 const geoUrl = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
 
@@ -21,7 +20,7 @@ export const Lobby = ({ onSelect, onShowHelp }: { onSelect: (country: string) =>
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white font-sans flex flex-col items-center justify-center p-8 overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white font-sans flex flex-col items-center justify-center p-6 overflow-hidden">
       <motion.div 
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -44,7 +43,7 @@ export const Lobby = ({ onSelect, onShowHelp }: { onSelect: (country: string) =>
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
-        className="bg-black/50 rounded-3xl border border-white/10 shadow-2xl w-full max-w-5xl h-[600px] relative overflow-hidden flex items-center justify-center"
+        className="bg-black/50 rounded-3xl border border-white/10 shadow-2xl w-full max-w-5xl h-[68vh] max-h-[620px] min-h-[430px] relative overflow-hidden flex items-center justify-center"
       >
         <ComposableMap
           projection="geoAzimuthalEqualArea"
@@ -55,52 +54,50 @@ export const Lobby = ({ onSelect, onShowHelp }: { onSelect: (country: string) =>
           }}
           className="w-full h-full outline-none"
         >
-          <ZoomableGroup center={[0, 0]} zoom={1} minZoom={1} maxZoom={4}>
-            <Geographies geography={geoUrl}>
-              {({ geographies }) =>
-                geographies.map((geo) => {
-                  const countryName = geo.properties.name;
-                  const tableCode = COUNTRY_MAP[countryName];
-                  const isSelectable = !!tableCode;
+          <Geographies geography={geoUrl}>
+            {({ geographies }) =>
+              geographies.map((geo) => {
+                const countryName = geo.properties.name;
+                const tableCode = COUNTRY_MAP[countryName];
+                const isSelectable = !!tableCode;
 
-                  return (
-                    <Geography
-                      key={geo.rsmKey}
-                      geography={geo}
-                      onMouseEnter={() => {
-                        if (isSelectable) setHoveredCountry(countryName);
-                      }}
-                      onMouseLeave={() => {
-                        setHoveredCountry(null);
-                      }}
-                      onClick={() => {
-                        if (isSelectable) onSelect(tableCode);
-                      }}
-                      style={{
-                        default: {
-                          fill: isSelectable ? "#1e293b" : "#0f172a",
-                          stroke: "#334155",
-                          strokeWidth: 0.5,
-                          outline: "none",
-                        },
-                        hover: {
-                          fill: isSelectable ? "#eab308" : "#0f172a",
-                          stroke: isSelectable ? "#fef08a" : "#334155",
-                          strokeWidth: 1,
-                          outline: "none",
-                          cursor: isSelectable ? "pointer" : "default",
-                        },
-                        pressed: {
-                          fill: isSelectable ? "#ca8a04" : "#0f172a",
-                          outline: "none",
-                        }
-                      }}
-                    />
-                  );
-                })
-              }
-            </Geographies>
-          </ZoomableGroup>
+                return (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    onMouseEnter={() => {
+                      if (isSelectable) setHoveredCountry(countryName);
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredCountry(null);
+                    }}
+                    onClick={() => {
+                      if (isSelectable) onSelect(tableCode);
+                    }}
+                    style={{
+                      default: {
+                        fill: isSelectable ? "#1e293b" : "#0f172a",
+                        stroke: "#334155",
+                        strokeWidth: 0.5,
+                        outline: "none",
+                      },
+                      hover: {
+                        fill: isSelectable ? "#eab308" : "#0f172a",
+                        stroke: isSelectable ? "#fef08a" : "#334155",
+                        strokeWidth: 1,
+                        outline: "none",
+                        cursor: isSelectable ? "pointer" : "default",
+                      },
+                      pressed: {
+                        fill: isSelectable ? "#ca8a04" : "#0f172a",
+                        outline: "none",
+                      }
+                    }}
+                  />
+                );
+              })
+            }
+          </Geographies>
         </ComposableMap>
 
         {hoveredCountry && (

@@ -625,7 +625,7 @@ def render_game_tab() -> None:
     if launch_params:
         launch_url = f"{energy_base_url}{separator}{urllib.parse.urlencode(launch_params)}"
 
-    components.iframe(launch_url, height=980, scrolling=True)
+    components.iframe(launch_url, height=1180, scrolling=True)
     loaded_from = "local production build" if energy_source == "build" else "running development server"
     st.caption(f"Loaded game hub from {loaded_from}.")
 
@@ -640,8 +640,8 @@ def render_game_tab() -> None:
 
 
 def main() -> None:
-    st.set_page_config(page_title="AUHack What-If Analysis", layout="wide")
-    st.title("AUHack What-If Analysis")
+    st.set_page_config(page_title="AUHack 2026", layout="wide")
+    st.title("AUHack 2026")
     st.caption("Model-based historical replay with shock scenarios.")
 
     model = load_model(MODEL_PATH)
@@ -724,7 +724,7 @@ def main() -> None:
                 "(for example wind +20%), then compare actual vs baseline model vs what-if model."
             )
 
-            if st.button("🎯 Load Demo Scenario", help="Loads a high-wind week in DK1 (Jan 2025) with +30% wind shock — great for demos."):
+            if st.button("🎯 Load Example Scenario", help="Loads a high-wind week in DK1 (Jan 2025) with +30% wind shock."):
                 st.session_state["selected_market"] = "DK1"
                 import datetime as _dt
                 st.session_state["replay_start_day"] = _dt.date(2025, 1, 13)
