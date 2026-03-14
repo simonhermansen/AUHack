@@ -1,0 +1,27 @@
+# Python cache and environments
+__pycache__/
+*.py[cod]
+.venv/
+
+# Secrets
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# OS/editor files
+.DS_Store
+.vscode/
+
+# Large generated training logs
+catboost_info/
+
+# Optional generated artifacts
+artifacts/combined/*.csv
+artifacts/*.parquet
+artifacts/*.png
+artifacts/*.cbm
+artifacts/**/*.csv
+artifacts/**/*.parquet
+artifacts/**/*.png
+artifacts/**/*.cbm
