@@ -1,193 +1,170 @@
-# AUHack
-Hackathon energy market case for InCommodities.
+# AUHack: Electricity Price Modeling + Interactive Game Demo
 
-## What This Repo Does
+Hackathon project for InCommodities combining:
 
-This repository has two main parts:
+1. A multi-market ML pipeline for hourly spot-price prediction.
+2. A Streamlit what-if analysis UI.
+3. A game tab with two integrated game modes.
 
-1. A multi-country ML pipeline that predicts hourly electricity spot prices.
-2. A Streamlit What-If Analysis app that replays historical periods and applies controlled feature shocks.
+The modeling pipeline uses all available country-market data, not single-market-only training.
 
-The model is trained on all available markets in the dataset, not single-country subsets.
+## Project Structure
 
-## Repository Layout
+Top-level:
 
-Top-level folders/files and their purpose:
+1. `data/`: Raw CSV inputs (`spot-price`, `total-load`, `generation`, `flows`, `weather`).
+2. `src/`: Python data/feature/model scripts.
+3. `artifacts/`: Generated model outputs and report tables/plots.
+4. `streamlit_app.py`: Main app (What-If + Game tab).
+5. `energy-gambling-markets/`: Frontend game hub (country map + mode chooser + Energy Roulette).
+6. `grid-casino/`: Frontend second game mode (monthly average betting + generation mix clues).
 
-1. `data/`
-Raw country CSV inputs for:
-`spot-price`, `total-load`, `generation`, `flows`, `weather`.
+Artifacts layout:
 
-2. `src/`
-Pipeline and analysis scripts.
+1. `artifacts/combined/`: Intermediate merged hourly tables.
+2. `artifacts/core/`: Runtime assets (`panel_dataset.parquet`, CatBoost model, core metrics).
+3. `artifacts/reports/tables/`: Experiment/benchmark CSV outputs.
+4. `artifacts/reports/plots/`: Plot PNG outputs.
 
-3. `artifacts/`
-Generated outputs from training/analysis (model files, tables, plots, combined intermediate files).
+## Quick Start (Judge-Friendly)
 
-Artifact sub-structure:
-
-1. `artifacts/combined/`
-Intermediate merged hourly CSVs used to build the panel dataset.
-
-2. `artifacts/core/`
-Core outputs used by training and Streamlit runtime:
-model, panel parquet, baseline metrics, feature importance.
-
-3. `artifacts/reports/tables/`
-Analysis CSV tables (feature ablations, holiday-impact tables, benchmark table).
-
-4. `artifacts/reports/plots/`
-PNG plots generated from report tables.
-
-4. `streamlit_app.py`
-Interactive app for historical what-if replay and AI briefing.
-
-5. `requirements.txt`
-Python dependencies.
-
-6. `package.json`
-Convenience scripts to run Streamlit.
-
-7. `.env.example`
-Template for local secrets (for OpenAI briefing).
-
-## Core Workflow
-
-The end-to-end pipeline is:
-
-1. Merge and hourly-align raw CSVs.
-2. Build panel dataset by market and timestamp.
-3. Add features (lags, rolling stats, calendar, cyclical encodings, holiday indicator, generation/flow totals).
-4. Split chronologically into train/validation/test.
-5. Train CatBoost with early stopping on validation.
-6. Report only holdout test metrics as final baseline quality.
-
-## Setup
+### 1) Python environment
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+npm run setup:python
 ```
 
-## Run Commands
-
-### A) Baseline pipeline (required)
-
-Run in order:
+### 2) Build game frontends
 
 ```powershell
-python src/combine_folder_csvs.py
-python src/build_panel_dataset.py
-python src/train_price_model.py
+npm run setup:games
+npm run build:games
 ```
 
-Expected key outputs:
-
-1. `artifacts/combined/*.csv`
-2. `artifacts/combined/timestamp_diagnostics.csv`
-3. `artifacts/core/panel_dataset.parquet`
-4. `artifacts/core/catboost_price_model.cbm`
-5. `artifacts/core/metrics.csv`
-6. `artifacts/core/feature_importance.csv`
-
-### B) Optional analysis scripts
-
-```powershell
-python src/feature_set_experiments.py --iterations 1200
-python src/holiday_feature_impact.py
-python src/benchmark_models.py
-python src/generate_plots.py
-```
-
-What they produce:
-
-1. Feature ablation comparison (`artifacts/reports/tables/feature_set_experiments.csv` + plots).
-2. Holiday feature impact tables (`artifacts/reports/tables/holiday_feature_impact_*.csv`).
-3. Benchmark comparison table (`artifacts/reports/tables/model_benchmark_comparison.csv`).
-4. Plot files in `artifacts/reports/plots/*.png`.
-
-### C) Launch the Streamlit app
-
-Option 1:
-
-```powershell
-python -m streamlit run streamlit_app.py
-```
-
-Option 2:
+### 3) Launch app
 
 ```powershell
 npm start
 ```
 
-## Streamlit App Behavior
+This starts Streamlit and embeds the game hub from local frontend builds.
 
-The app is designed for demo-friendly what-if storytelling:
+## Main Workflows
 
-1. Select a market from the Europe map.
-2. Choose a historical start day and replay horizon.
-3. Shock one factor (wind/load/temperature) by percent or absolute amount.
-4. Compare three curves:
-	- Actual observed price
-	- Model baseline
-	- What-if projection
-5. Optionally request AI briefing (on button click) to explain:
-	- shock-to-graph relationship,
-	- why the behavior may make sense,
-	- and why it might not fully hold.
+### A) Baseline ML pipeline
 
-Demo preset:
+```powershell
+npm run run:pipeline
+```
 
-1. `Load Demo Scenario` sets `DK1`, wind speed at 100m, +30% shock, and a stable showcase date.
+Equivalent script order:
 
-## Script Map (`src/`)
+1. `src/combine_folder_csvs.py`
+2. `src/build_panel_dataset.py`
+3. `src/train_price_model.py`
 
-1. `combine_folder_csvs.py`
-Reads raw folder CSVs, aligns to hourly, and writes `artifacts/combined/*.csv`.
+### B) Optional report generation
 
-2. `build_panel_dataset.py`
-Builds the unified panel from combined files and writes `artifacts/core/panel_dataset.parquet`.
+```powershell
+npm run run:reports
+```
 
-3. `modeling_utils.py`
-Shared feature engineering, split logic, metrics, and CatBoost loader helpers.
+Includes:
 
-4. `train_price_model.py`
-Trains baseline CatBoost model and writes model/metrics/feature-importance outputs.
+1. Feature-set ablation experiments.
+2. Holiday feature impact analysis.
+3. CatBoost vs benchmark model comparison.
+4. Static report plot generation.
 
-5. `feature_set_experiments.py`
-Runs variant-based ablation to compare feature group importance.
+## App UX Summary
 
-6. `holiday_feature_impact.py`
-Compares with-holiday vs without-holiday model variants.
+### What-If Analysis tab
 
-7. `benchmark_models.py`
-Benchmarks CatBoost against naive, SARIMA, and SARIMAX baselines.
+1. Select market on map.
+2. Pick replay start date + horizon.
+3. Apply factor shock (percent or absolute).
+4. Compare actual vs baseline model vs what-if trajectory.
+5. Generate optional AI briefing text.
 
-8. `generate_plots.py`
-Builds static PNG figures from experiment and benchmark CSV outputs.
+### Game tab
 
-## Data and Modeling Notes
+1. Open shared game hub.
+2. Select country from map.
+3. Choose game mode:
+   - Energy Roulette
+   - Grid Casino
+4. Grid Casino back-navigation returns to same shared country/map game hub.
 
-1. Spot prices are never forward-filled.
-2. Non-price series are forward-filled with a short cap (2 hours).
-3. Rolling features are computed within each market to avoid cross-market leakage.
-4. Temporal split validation is enforced to avoid empty partitions.
+## Frontend Integration Details
 
-## Secrets and Safety
+### Embedded apps
 
-For AI briefing with OpenAI:
+1. `energy-gambling-markets` is the game hub embedded first in Streamlit.
+2. `grid-casino` is launched from the hub with country handoff.
+
+### Query-parameter handoff
+
+1. `grid_url`: passed from Streamlit into Energy hub so it can launch Grid mode.
+2. `country`: selected market code passed between game apps.
+3. `return_url`: passed into Grid so "Back to Lobby" returns to the same shared map/game chooser.
+
+### Standalone frontend dev (optional)
+
+If you want to run the game apps outside Streamlit:
+
+```powershell
+npm --prefix energy-gambling-markets run dev
+npm --prefix grid-casino run dev
+```
+
+Default dev URLs:
+
+1. Energy hub: `http://127.0.0.1:3000`
+2. Grid Casino: `http://127.0.0.1:3001`
+
+## Game Rules (Current)
+
+### Energy Roulette
+
+1. Data-driven roulette using hourly market context.
+2. Country-specific rounds and outside bet mapping.
+
+### Grid Casino
+
+1. Bet whether spot price is above or below the **monthly average** for that hour's month.
+2. Uses hourly generation mix context (renewable %, fossil %, top generation sources) to inform guesses.
+3. Includes short in-game "How to play" helper.
+
+## Current Limitations
+
+1. Frontend game projects are separate Vite apps embedded in Streamlit (not a single monorepo package).
+2. Game data is fetched from GitHub raw CSVs at runtime; network quality affects initial load time.
+3. Grid Casino currently calculates monthly baseline from available historical rows in the selected market dataset (not external market fundamentals).
+4. Streamlit and game frontends are demo-optimized; there is no production auth, persistence, or multiplayer state.
+
+## Next Steps
+
+1. Unify shared frontend utility/data code between both game projects to reduce duplicate logic.
+2. Add caching layer/API for faster game data fetches.
+3. Add lightweight automated checks (Python + frontend builds) in CI.
+4. Add one-click bootstrap script for clean-machine setup.
+5. Expand explanatory tooltips for what-if assumptions and model caveats.
+
+## Environment / Secrets
 
 1. Copy `.env.example` to `.env`.
-2. Set `OPENAI_API_KEY=...`.
-3. Never commit `.env`.
+2. Set `OPENAI_API_KEY` if AI briefing is required.
+3. Do not commit `.env`.
 
-`.gitignore` already excludes `.env` and other secret patterns.
+## Script Reference
 
-## Extending the Project
+Root `package.json` scripts:
 
-To add another external signal (fuel, outages, EUA, etc.):
-
-1. Add a source with `market`, `time`, and value columns.
-2. Merge it into panel construction in `src/build_panel_dataset.py`.
-3. Re-run baseline pipeline and retrain.
+1. `setup:python`: install Python requirements using local venv Python.
+2. `setup:games`: install both frontend game dependencies.
+3. `build:games`: build both game frontends.
+4. `run:pipeline`: run core ML pipeline.
+5. `run:reports`: run optional analysis/report scripts.
+6. `start`: run Streamlit app.

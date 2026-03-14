@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 .venv/
 
+# Frontend dependencies/build outputs
+**/node_modules/
+**/dist/
+
 # Secrets
 .env
 .env.*
@@ -17,10 +21,6 @@ __pycache__/
 catboost_info/
 
 # Optional generated artifacts
-artifacts/combined/*.csv
-artifacts/*.parquet
-artifacts/*.png
-artifacts/*.cbm
 artifacts/**/*.csv
 artifacts/**/*.parquet
 artifacts/**/*.png

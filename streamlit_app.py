@@ -7,6 +7,7 @@ import os
 import socket
 import sys
 import threading
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -104,6 +105,26 @@ def _start_local_static_server(directory: str) -> str | None:
         return f"http://127.0.0.1:{chosen_port}"
     except Exception:
         return None
+
+
+def _resolve_embedded_game_base_url(
+    *,
+    game_root: Path,
+    default_dev_url: str,
+    dev_url_env_name: str,
+) -> tuple[str | None, str | None]:
+    game_dist = game_root / "dist"
+    configured_dev_url = os.environ.get(dev_url_env_name, default_dev_url)
+
+    if game_dist.exists() and (game_dist / "index.html").exists():
+        static_url = _start_local_static_server(str(game_dist))
+        if static_url:
+            return f"{static_url}/index.html", "build"
+
+    if _url_is_reachable(configured_dev_url):
+        return configured_dev_url, "dev"
+
+    return None, None
 
 
 @st.cache_resource
@@ -572,34 +593,50 @@ def render_ai_briefing_video(summary_text: str) -> None:
 
 
 def render_game_tab() -> None:
-    game_root = PROJECT_ROOT / "energy-gambling-markets"
-    game_dist = game_root / "dist"
-    configured_dev_url = os.environ.get("GAME_DEV_URL", "http://127.0.0.1:3000")
-
     st.markdown("### Game")
-    st.caption("Interactive game experience embedded from your game app.")
+    st.caption("Select a country in the game lobby, then choose which game mode to play.")
 
-    if game_dist.exists() and (game_dist / "index.html").exists():
-        static_url = _start_local_static_server(str(game_dist))
-        if static_url:
-            game_url = f"{static_url}/index.html"
-            components.iframe(game_url, height=920, scrolling=True)
-            st.caption("Loaded from local production build.")
-            return
-
-    if _url_is_reachable(configured_dev_url):
-        components.iframe(configured_dev_url, height=920, scrolling=True)
-        st.caption("Loaded from running development server.")
+    energy_base_url, energy_source = _resolve_embedded_game_base_url(
+        game_root=PROJECT_ROOT / "energy-gambling-markets",
+        default_dev_url="http://127.0.0.1:3000",
+        dev_url_env_name="GAME_ENERGY_DEV_URL",
+    )
+    if not energy_base_url:
+        st.warning("Energy Roulette app was not found as build or running dev server.")
+        st.code(
+            "cd energy-gambling-markets\n"
+            "npm install --legacy-peer-deps\n"
+            "npm run build",
+            language="bash",
+        )
         return
 
-    st.warning("Game app not found as build or running dev server.")
-    st.code(
-        "cd energy-gambling-markets\n"
-        "npm install\n"
-        "npm run build",
-        language="bash",
+    grid_base_url, _ = _resolve_embedded_game_base_url(
+        game_root=PROJECT_ROOT / "grid-casino",
+        default_dev_url="http://127.0.0.1:3001",
+        dev_url_env_name="GAME_GRID_DEV_URL",
     )
-    st.caption("After building, rerun Streamlit and the game will load here automatically.")
+    launch_params: dict[str, str] = {}
+    if grid_base_url:
+        launch_params["grid_url"] = grid_base_url
+
+    separator = "&" if "?" in energy_base_url else "?"
+    launch_url = energy_base_url
+    if launch_params:
+        launch_url = f"{energy_base_url}{separator}{urllib.parse.urlencode(launch_params)}"
+
+    components.iframe(launch_url, height=980, scrolling=True)
+    loaded_from = "local production build" if energy_source == "build" else "running development server"
+    st.caption(f"Loaded game hub from {loaded_from}.")
+
+    if not grid_base_url:
+        st.info("Grid Casino was not found yet. Build it to enable the in-game mode switch.")
+        st.code(
+            "cd grid-casino\n"
+            "npm install --legacy-peer-deps\n"
+            "npm run build",
+            language="bash",
+        )
 
 
 def main() -> None:

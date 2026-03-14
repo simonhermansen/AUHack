@@ -4,7 +4,7 @@ import { RouletteWheel, RED_NUMBERS } from './components/RouletteWheel';
 import { BettingBoard } from './components/BettingBoard';
 import { Lobby } from './components/Lobby';
 import { Bet } from './types';
-import { fetchSpotPrices, fetchAllFlows, fetchGeneration, fetchTotalLoad, fetchWeather, SpotPrice, Flow, Generation, TotalLoad, Weather } from './services/dataService';
+import { COUNTRIES, fetchSpotPrices, fetchAllFlows, fetchGeneration, fetchTotalLoad, fetchWeather, SpotPrice, Flow, Generation, TotalLoad, Weather } from './services/dataService';
 import { SlotText } from './components/SlotText';
 
 const FOSSIL_TYPES = ['LIGNITE', 'FOSSIL-GAS', 'HARD-COAL', 'COAL-DERVIED GAS', 'FOSSIL', 'OIL'];
@@ -16,6 +16,7 @@ const RENEWABLE_TYPES = [
 
 export default function App() {
   const [country, setCountry] = useState<string | null>(null);
+  const [pendingCountry, setPendingCountry] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   
   // Data state
@@ -49,6 +50,7 @@ export default function App() {
   const [winStatus, setWinStatus] = useState<{ amount: number, type: 'win' | 'lose', message: string } | null>(null);
 
   const [showHelp, setShowHelp] = useState(false);
+  const [gridLauncherUrl, setGridLauncherUrl] = useState<string | null>(null);
 
   const loadData = async (selectedCountry: string) => {
     setLoading(true);
@@ -72,6 +74,44 @@ export default function App() {
       alert("Failed to load data");
     }
     setLoading(false);
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const gridUrlFromQuery = params.get('grid_url');
+    if (gridUrlFromQuery) {
+      setGridLauncherUrl(gridUrlFromQuery);
+    }
+
+    const countryFromQuery = params.get('country');
+    if (!countryFromQuery) return;
+    const normalizedCountry = countryFromQuery.toUpperCase();
+    if (COUNTRIES.includes(normalizedCountry)) {
+      setPendingCountry(normalizedCountry);
+    }
+  }, []);
+
+  const launchGridCasino = () => {
+    if (!pendingCountry) return;
+    if (!gridLauncherUrl) {
+      alert('Grid Casino is not available yet. Build or run the grid-casino app first.');
+      return;
+    }
+    try {
+      const hubUrl = new URL(window.location.href);
+      hubUrl.searchParams.delete('country');
+      if (gridLauncherUrl) {
+        hubUrl.searchParams.set('grid_url', gridLauncherUrl);
+      }
+
+      const targetUrl = new URL(gridLauncherUrl);
+      targetUrl.searchParams.set('country', pendingCountry);
+      targetUrl.searchParams.set('return_url', hubUrl.toString());
+      window.location.href = targetUrl.toString();
+    } catch {
+      const separator = gridLauncherUrl.includes('?') ? '&' : '?';
+      window.location.href = `${gridLauncherUrl}${separator}country=${encodeURIComponent(pendingCountry)}`;
+    }
   };
 
   const prepareNextRound = (
@@ -248,6 +288,7 @@ export default function App() {
 
   const handleChangeTable = () => {
     setCountry(null);
+    setPendingCountry(null);
     setWinStatus(null);
     setCurrentRound(null);
     setBets([]);
@@ -269,8 +310,41 @@ export default function App() {
             <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white text-2xl font-bold">
               Loading Market Data...
             </div>
+          ) : pendingCountry ? (
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white font-sans flex flex-col items-center justify-center p-8">
+              <div className="w-full max-w-3xl bg-black/50 border border-white/10 rounded-3xl shadow-2xl p-8">
+                <div className="text-center mb-8">
+                  <div className="text-4xl font-serif text-yellow-500 tracking-widest mb-2">TABLE {pendingCountry}</div>
+                  <p className="text-gray-300">Choose which game you want to play for this selected country.</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <button
+                    onClick={() => void loadData(pendingCountry)}
+                    className="p-6 rounded-2xl border border-yellow-500/40 bg-yellow-500/10 hover:bg-yellow-500/20 text-left transition-colors"
+                  >
+                    <div className="text-xl font-bold text-yellow-400 mb-1">Energy Roulette</div>
+                    <div className="text-sm text-gray-300">Play the wheel and data-driven betting table.</div>
+                  </button>
+                  <button
+                    onClick={launchGridCasino}
+                    className="p-6 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-left transition-colors"
+                  >
+                    <div className="text-xl font-bold text-emerald-400 mb-1">Grid Casino</div>
+                    <div className="text-sm text-gray-300">Switch to the storage trading game for the same country.</div>
+                  </button>
+                </div>
+                <div className="mt-6 flex justify-center">
+                  <button
+                    onClick={() => setPendingCountry(null)}
+                    className="px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-bold border border-slate-600 transition-colors"
+                  >
+                    Back to country map
+                  </button>
+                </div>
+              </div>
+            </div>
           ) : (
-            <Lobby onSelect={loadData} onShowHelp={() => setShowHelp(true)} />
+            <Lobby onSelect={setPendingCountry} onShowHelp={() => setShowHelp(true)} />
           )}
         </>
       ) : (

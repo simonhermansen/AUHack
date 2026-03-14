@@ -3,6 +3,11 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
+    "setup:python": ".\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt",
+    "setup:games": "powershell -NoProfile -Command \"npm --prefix energy-gambling-markets install --legacy-peer-deps; npm --prefix grid-casino install --legacy-peer-deps\"",
+    "build:games": "powershell -NoProfile -Command \"npm --prefix energy-gambling-markets run build; npm --prefix grid-casino run build\"",
+    "run:pipeline": "powershell -NoProfile -Command \".\\.venv\\Scripts\\python.exe src/combine_folder_csvs.py; .\\.venv\\Scripts\\python.exe src/build_panel_dataset.py; .\\.venv\\Scripts\\python.exe src/train_price_model.py\"",
+    "run:reports": "powershell -NoProfile -Command \".\\.venv\\Scripts\\python.exe src/feature_set_experiments.py --iterations 1200; .\\.venv\\Scripts\\python.exe src/benchmark_models.py; .\\.venv\\Scripts\\python.exe src/holiday_feature_impact.py; .\\.venv\\Scripts\\python.exe src/generate_plots.py\"",
     "start": ".\\.venv\\Scripts\\python.exe -m streamlit run streamlit_app.py",
     "start:headless": ".\\.venv\\Scripts\\python.exe -m streamlit run streamlit_app.py --server.headless true"
   }
