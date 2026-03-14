@@ -25,3 +25,15 @@ artifacts/**/*.csv
 artifacts/**/*.parquet
 artifacts/**/*.png
 artifacts/**/*.cbm
+
+# Runtime assets that should stay in git for plug-and-play judging
+!artifacts/core/catboost_price_model.cbm
+!artifacts/core/panel_dataset.parquet
+!artifacts/core/metrics.csv
+!artifacts/core/feature_importance.csv
+
+# Keep production builds so Streamlit can embed games without local npm build
+!/energy-gambling-markets/dist/
+!/energy-gambling-markets/dist/**
+!/grid-casino/dist/
+!/grid-casino/dist/**
