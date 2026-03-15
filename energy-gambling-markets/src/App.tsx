@@ -49,7 +49,6 @@ export default function App() {
 
   const [winStatus, setWinStatus] = useState<{ amount: number, type: 'win' | 'lose', message: string } | null>(null);
 
-  const [showHelp, setShowHelp] = useState(false);
   const [gridLauncherUrl, setGridLauncherUrl] = useState<string | null>(null);
 
   const loadData = async (selectedCountry: string) => {
@@ -344,7 +343,7 @@ export default function App() {
               </div>
             </div>
           ) : (
-            <Lobby onSelect={setPendingCountry} onShowHelp={() => setShowHelp(true)} />
+            <Lobby onSelect={setPendingCountry} />
           )}
         </>
       ) : (
@@ -357,13 +356,7 @@ export default function App() {
             <div className="text-4xl font-serif text-yellow-500 drop-shadow-[0_0_15px_rgba(234,179,8,0.5)] tracking-widest">
               TABLE {country}
             </div>
-            <button 
-              onClick={() => setShowHelp(true)}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-bold border border-slate-600 transition-colors flex items-center gap-2"
-            >
-              <span className="w-5 h-5 flex items-center justify-center bg-yellow-500 text-black rounded-full text-[10px]">?</span>
-              HOW TO PLAY
-            </button>
+            <div className="w-[132px]" />
           </div>
 
           {currentRound && (
@@ -486,91 +479,6 @@ export default function App() {
           </div>
         </div>
       )}
-
-      <AnimatePresence>
-        {showHelp && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-          >
-            <motion.div 
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              className="bg-slate-900 border border-slate-700 rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative"
-            >
-              <button 
-                onClick={() => setShowHelp(false)}
-                className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-
-              <h2 className="text-3xl font-serif text-yellow-500 mb-6 border-b border-slate-800 pb-4">Energy Roulette Guide</h2>
-              
-              <div className="space-y-6 text-slate-300 leading-relaxed">
-                <section>
-                  <h3 className="text-white font-bold mb-2 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                    THE CONCEPT
-                  </h3>
-                  <p>
-                    This is not your standard roulette. Every spin is based on <strong>real-world energy market data</strong> from the selected country. 
-                    The pockets on the wheel represent the percentage of the total load met by renewable energy (Solar, Wind, Biomass, Hydro).
-                  </p>
-                </section>
-
-                <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-black/30 p-4 rounded-xl border border-white/5">
-                    <h4 className="text-red-400 font-bold mb-2">RENEWABLES WIN (RED)</h4>
-                    <p className="text-xs">Renewables met 50% or more of the total electricity demand for that hour.</p>
-                  </div>
-                  <div className="bg-black/30 p-4 rounded-xl border border-white/5">
-                    <h4 className="text-slate-400 font-bold mb-2">FOSSIL WINS (BLACK)</h4>
-                    <p className="text-xs">Fossil fuels generated more than renewables (Renewables &lt; 50%).</p>
-                  </div>
-                  <div className="bg-black/30 p-4 rounded-xl border border-white/5">
-                    <h4 className="text-emerald-400 font-bold mb-2">IMPORTING (EVEN)</h4>
-                    <p className="text-xs">The country was a net importer of electricity during this hour.</p>
-                  </div>
-                  <div className="bg-black/30 p-4 rounded-xl border border-white/5">
-                    <h4 className="text-blue-400 font-bold mb-2">EXPORTING (ODD)</h4>
-                    <p className="text-xs">The country was a net exporter of electricity during this hour.</p>
-                  </div>
-                </section>
-
-                <section>
-                  <h3 className="text-white font-bold mb-2 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                    HOW TO WIN
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2 text-sm">
-                    <li><strong>Straight Bet:</strong> Bet on a specific percentage pocket. Pockets are ordered 0% to 100%.</li>
-                    <li><strong>Outside Bets:</strong> Bet on categories like Renewables vs Fossil or Importing vs Exporting.</li>
-                    <li><strong>Winning Pocket:</strong> The ball lands on the pocket closest to the actual renewable percentage recorded in the market data.</li>
-                  </ul>
-                </section>
-
-                <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-xl">
-                  <p className="text-yellow-500 text-xs italic">
-                    Note: Outside bets are evaluated against the actual market data, while straight bets are evaluated against the pocket the ball lands in.
-                  </p>
-                </div>
-              </div>
-
-              <button 
-                onClick={() => setShowHelp(false)}
-                className="w-full mt-8 py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-xl transition-all active:scale-95"
-              >
-                GOT IT, LET'S PLAY!
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 }

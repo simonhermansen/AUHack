@@ -1,7 +1,6 @@
 import { motion } from 'motion/react';
 import { COUNTRIES } from '../services/dataService';
 import { Zap, TrendingUp, Coins } from 'lucide-react';
-import { useState } from 'react';
 
 interface CasinoLobbyProps {
   onSelectGame: (countryId: string) => void;
@@ -9,8 +8,6 @@ interface CasinoLobbyProps {
 }
 
 export function CasinoLobby({ onSelectGame, balance }: CasinoLobbyProps) {
-  const [showHelp, setShowHelp] = useState(false);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white p-6 font-sans selection:bg-yellow-500/30">
       <div className="max-w-5xl mx-auto">
@@ -26,12 +23,6 @@ export function CasinoLobby({ onSelectGame, balance }: CasinoLobbyProps) {
           </div>
           
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowHelp(true)}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-bold border border-slate-600 transition-colors"
-            >
-              HOW TO PLAY
-            </button>
             <div className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-full px-4 py-2">
               <Coins className="w-5 h-5 text-yellow-400" />
               <span className="font-mono font-bold text-lg text-white">€{balance.toFixed(2)}</span>
@@ -72,23 +63,6 @@ export function CasinoLobby({ onSelectGame, balance }: CasinoLobbyProps) {
           ))}
         </div>
       </div>
-
-      {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 max-w-xl w-full">
-            <h3 className="text-2xl font-bold text-yellow-400 mb-4">How to play Grid Casino</h3>
-            <p className="text-gray-200 text-sm mb-2">1. Pick a country table and stake amount.</p>
-            <p className="text-gray-200 text-sm mb-2">2. Guess if spot price is below or above that month’s average.</p>
-            <p className="text-gray-200 text-sm mb-4">3. Use hourly generation mix clues to improve your odds.</p>
-            <button
-              onClick={() => setShowHelp(false)}
-              className="w-full py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-xl transition-colors"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

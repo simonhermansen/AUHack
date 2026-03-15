@@ -16,7 +16,7 @@ const COUNTRY_MAP: Record<string, string> = {
   'Poland': 'PL'
 };
 
-export const Lobby = ({ onSelect, onShowHelp }: { onSelect: (country: string) => void, onShowHelp: () => void }) => {
+export const Lobby = ({ onSelect }: { onSelect: (country: string) => void }) => {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
 
   return (
@@ -30,13 +30,6 @@ export const Lobby = ({ onSelect, onShowHelp }: { onSelect: (country: string) =>
       </motion.div>
       <div className="flex flex-col items-center mb-8">
         <p className="text-gray-400 text-lg tracking-widest uppercase mb-4">Select a country on the map to join a table</p>
-        <button 
-          onClick={onShowHelp}
-          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-bold border border-slate-600 transition-colors flex items-center gap-2"
-        >
-          <span className="w-5 h-5 flex items-center justify-center bg-yellow-500 text-black rounded-full text-[10px]">?</span>
-          HOW TO PLAY
-        </button>
       </div>
 
       <motion.div 

@@ -98,7 +98,7 @@ export function GameTable({ countryData, balance, onBack, onUpdateBalance }: Gam
     const start = Math.max(0, index - 12);
     const end = Math.min(countryData.records.length, index + 13);
     return countryData.records.slice(start, end).map(r => ({
-      time: new Date(r.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: new Date(r.time).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
       price: r.value,
       isCurrent: r.time === currentRecord.time
     }));
@@ -107,8 +107,8 @@ export function GameTable({ countryData, balance, onBack, onUpdateBalance }: Gam
   if (!currentRecord) return null;
 
   const dateObj = new Date(currentRecord.time);
-  const dateString = dateObj.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  const timeString = dateObj.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  const dateString = dateObj.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const timeString = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white p-6 font-sans">
